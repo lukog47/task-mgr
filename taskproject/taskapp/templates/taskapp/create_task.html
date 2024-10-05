@@ -1,0 +1,35 @@
+{% extends 'taskapp/base.html' %}
+
+{% block title %}Create Task{% endblock %}
+
+{% block content %}
+    <h1 class="mt-4">Create Task</h1>
+    <form method="POST" class="mt-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="title">Task Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" name="description"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="due_date">Due Date</label>
+            <input type="date" class="form-control" id="due_date" name="due_date">
+        </div>
+        <div class="form-group">
+            <label for="priority">Priority</label>
+            <select class="form-control" id="priority" name="priority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'index' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+{% endblock %}
+
+
+
