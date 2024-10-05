@@ -1,28 +1,40 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.utils import timezone
+
 from .models import Task
 from django.contrib.auth.decorators import login_required
-from .forms import TaskForm
+from .forms import TaskForm, CustomUserCreationForm
+from django.contrib.auth.views import LoginView
+
+class CustomLoginView(LoginView):
+    template_name = 'users/login.html'
+
+    def form_invalid(self, form):
+        messages.error(self.request, "Invalid username or password.")
+        return super().form_invalid(form)
+
 
 @login_required
 def index(request):
-    tasks = Task.objects.filter(user=request.user)  # Get tasks for the logged-in user
+    tasks = Task.objects.filter(user=request.user)
     return render(request, 'taskapp/index.html', {'tasks': tasks})
 
 @login_required
 def create_task(request):
     if request.method == 'POST':
-        form = TaskForm(request.POST)  # Bind the form to the POST data
+        form = TaskForm(request.POST)
         if form.is_valid():
-            task = form.save(commit=False)  # Save the task but don't commit to the database yet
-            task.user = request.user  # Set the user to the logged-in user
-            task.save()  # Now save to the database
-            return redirect('index')  # Redirect to the index page after successful creation
+            task = form.save(commit=False)
+            task.created_at = timezone.now()
+            task.user = request.user
+            task.save()
+            return redirect('index')
         else:
-            print(form.errors)  # Log the errors to the console for debugging
+            print(form.errors)
     else:
-        form = TaskForm()  # Initialize an empty form
+        form = TaskForm()
 
     return render(request, 'taskapp/create_task.html', {'form': form})
 
@@ -31,12 +43,12 @@ def create_task(request):
 def update_task(request, pk):
     task = get_object_or_404(Task, pk=pk)
     if request.method == 'POST':
-        form = TaskForm(request.POST, instance=task)  # Bind the form to the existing task instance
-        if form.is_valid():  # Validate the form
-            form.save()  # Save the updated task
-            return redirect('index')  # Redirect to index after saving
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            return redirect('index')
     else:
-        form = TaskForm(instance=task)  # Create a form instance with the existing task data
+        form = TaskForm(instance=task)
 
     return render(request, 'taskapp/update_task.html', {'form': form, 'task': task})
 
@@ -50,15 +62,15 @@ def delete_task(request, pk):
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            form.save()  # Save the new user to the database
+            form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}! You can now log in.')
-            return redirect('login')  # Redirect to the login page after registration
+            return redirect('login')
         else:
-            messages.error(request, 'Please correct the errors below.')  # Notify the user of form errors
+            messages.error(request, 'Please correct the errors below.')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
 
     return render(request, 'users/register.html', {'form': form})

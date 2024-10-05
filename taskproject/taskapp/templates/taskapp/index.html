@@ -16,6 +16,8 @@
                             <p class="card-text"><strong>Description:</strong> {{ task.description }}</p>
                             <p class="card-text"><strong>Due Date:</strong> {{ task.due_date }}</p>
                             <p class="card-text"><strong>Priority:</strong> {{ task.priority }}</p>
+                            <p class="card-text"><strong>Created at:</strong> {{ task.created_at }}</p>
+
                             <div class="d-flex justify-content-between">
                                 <a href="{% url 'update_task' task.pk %}" class="btn btn-warning btn-sm">Edit</a>
                                 <form action="{% url 'delete_task' task.pk %}" method="POST" style="display:inline;" onsubmit="return confirmDelete();">
